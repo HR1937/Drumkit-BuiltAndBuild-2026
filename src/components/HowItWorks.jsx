@@ -87,10 +87,10 @@ export default function HowItWorks() {
 
           <h2 className="text-4xl font-bold tracking-tight md:text-5xl">
             <span className="text-ink">
-              From Fragmented Data
-            </span>{" "}
+              From Fragmented Data to{" "}
+            </span>
             <span className="text-thread">
-              to One Connected Journey
+              One Connected Journey
             </span>
           </h2>
 
