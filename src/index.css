@@ -1,45 +1,115 @@
 @import "tailwindcss";
 
-@theme {
-  --color-paper: #f5f6fb;
-  --color-surface: #ffffff;
-  --color-ink: #12162b;
-  --color-muted: #6b7093;
-  --color-thread: #ff5a36;
-  --color-thread-2: #ffb020;
-  --color-teal: #0d9488;
+/* ============================================================
+   Tailwind v4: enable class/attribute-based dark mode
+   ============================================================ */
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
 
-  --font-display: "Fraunces", "Georgia", serif;
-  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+/* ============================================================
+   LIGHT THEME — default token values
+   ============================================================ */
+:root,
+[data-theme="light"] {
+  color-scheme: light;
+
+  --paper:        #f5f6fb;
+  --surface:      #ffffff;
+  --surface-soft: #fafbfd;
+  --ink:          #12162b;
+  --ink-soft:     #2a2f4a;
+  --muted:        #6b7093;
+  --border:       #e7e9f2;
+
+  --thread:       #ff5a36;
+  --thread-2:     #ffb020;
+  --teal:         #0d9488;
+
+  /* semantic helpers */
+  --nav-bg:       rgba(255, 255, 255, 0.85);
+  --nav-border:   rgba(18, 22, 43, 0.08);
+  --shadow-card:  0 10px 30px rgba(18, 22, 43, 0.06);
+  --shadow-hover: 0 20px 45px rgba(255, 90, 54, 0.16);
 }
 
+/* ============================================================
+   DARK THEME — override the same variables
+   ============================================================ */
+[data-theme="dark"] {
+  color-scheme: dark;
+
+  --paper:        #0f1017;
+  --surface:      #171923;
+  --surface-soft: #1c1f2e;
+  --ink:          #f1f1f6;
+  --ink-soft:     #d1d3e0;
+  --muted:        #9a9db1;
+  --border:       #2a2d3d;
+
+  --thread:       #ff8a4c;
+  --thread-2:     #ffb648;
+  --teal:         #2dd4bf;
+
+  --nav-bg:       rgba(23, 25, 35, 0.85);
+  --nav-border:   rgba(255, 255, 255, 0.08);
+  --shadow-card:  0 10px 30px rgba(0, 0, 0, 0.45);
+  --shadow-hover: 0 20px 45px rgba(255, 138, 76, 0.22);
+}
+
+/* ============================================================
+   Tailwind v4 @theme — reference the semantic variables above
+   so `bg-paper`, `text-ink`, etc. auto-flip with data-theme
+   ============================================================ */
+@theme {
+  --color-paper:    var(--paper);
+  --color-surface:  var(--surface);
+  --color-ink:      var(--ink);
+  --color-ink-soft: var(--ink-soft);
+  --color-muted:    var(--muted);
+  --color-border:   var(--border);
+
+  --color-thread:   var(--thread);
+  --color-thread-2: var(--thread-2);
+  --color-teal:     var(--teal);
+
+  --font-display: "Fraunces", "Georgia", serif;
+  --font-sans:    "Inter", ui-sans-serif, system-ui, sans-serif;
+}
+
+/* ============================================================
+   Base
+   ============================================================ */
 html {
   scroll-behavior: smooth;
+  scroll-padding-top: 88px;
+  background-color: var(--paper);
+  color: var(--ink);
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 body {
-  background-color: var(--color-paper);
-  color: var(--color-ink);
+  margin: 0;
+  background-color: var(--paper);
+  color: var(--ink);
   font-family: var(--font-sans);
+  transition: background-color 0.3s ease, color 0.3s ease;
+  -webkit-font-smoothing: antialiased;
 }
 
-/* Thread drawing along the journey paths */
-@keyframes draw-thread {
-  to { stroke-dashoffset: 0; }
-}
+/* ============================================================
+   Keyframes (unchanged)
+   ============================================================ */
+@keyframes draw-thread { to { stroke-dashoffset: 0; } }
 
-/* Breathing ring behind the central hub */
 @keyframes pulse-ring {
   0%, 100% { transform: scale(1); opacity: 0.45; }
-  50% { transform: scale(1.14); opacity: 0.12; }
+  50%      { transform: scale(1.14); opacity: 0.12; }
 }
 
 @keyframes float-slow {
   0%, 100% { transform: translateY(0px); }
-  50% { transform: translateY(-8px); }
+  50%      { transform: translateY(-8px); }
 }
 
-/* One-by-one page reveal: blurred + offset from the left/top -> sharp + settled */
 @keyframes reveal-left {
   from { opacity: 0; transform: translate(-26px, -8px); filter: blur(8px); }
   to   { opacity: 1; transform: translate(0, 0); filter: blur(0); }
@@ -55,7 +125,6 @@ body {
   to   { opacity: 1; transform: translateY(0); filter: blur(0); }
 }
 
-/* Shine sweep used on the primary CTA */
 @keyframes shine-sweep {
   from { transform: translateX(-130%) skewX(-15deg); }
   to   { transform: translateX(230%) skewX(-15deg); }
