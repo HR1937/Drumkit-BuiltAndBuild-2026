@@ -3,8 +3,6 @@ import { Menu, X, ArrowRight } from "lucide-react";
 
 const NAV_LINKS = [
   { label: "How It Works", href: "#how-it-works" },
-  { label: "How We Stitch Journeys", href: "#stitch-journeys" },
-  { label: "Tools", href: "#tools" },
   { label: "Features", href: "#features" },
   { label: "Pricing", href: "#pricing" },
   { label: "Reports", href: "#reports" },
