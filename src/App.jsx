@@ -1,6 +1,7 @@
 import Navbar from "./components/Navbar";
 import Hero from "./components/Hero";
-import Proof from "./components/Proof";
+import HowItWorks from "./components/HowItWorks";
+import Pricing from "./components/Pricing";
 
 export default function App() {
   return (
@@ -8,7 +9,8 @@ export default function App() {
       <Navbar />
       <main>
         <Hero />
-        <Proof />
+        <HowItWorks />
+        <Pricing />
         {/* Next sections get added here as you share their content */}
       </main>
     </div>
