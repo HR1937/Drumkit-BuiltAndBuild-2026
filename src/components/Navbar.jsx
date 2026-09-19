@@ -1,7 +1,11 @@
 // src/components/Navbar.jsx
 import { useEffect, useState } from "react";
+
 import { Menu, X, ArrowRight, Moon, Sun } from "lucide-react";
 import useTheme from "../hooks/useTheme";
+
+import { Link } from "react-router-dom";
+
 
 /* --------------------------------------------------------------------------
    NAV_LINKS — every entry is a hash (#section-id).
@@ -118,6 +122,7 @@ export default function Navbar() {
             Log In
           </a>
 
+
           {/* ---- Theme toggle (desktop) ---- */}
           <button
             onClick={toggle}
@@ -128,17 +133,16 @@ export default function Navbar() {
             {theme === "dark" ? <Sun size={16} /> : <Moon size={16} />}
           </button>
 
-          <a
-            href="#signup"
-            onClick={(e) => handleNavClick(e, "#signup")}
-            className="group relative inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-thread to-thread-2 px-5 py-2.5 text-[0.875rem] font-medium text-white shadow-[0_0_0_0_rgba(255,90,54,0.35)] transition-all duration-300 hover:scale-[1.04] hover:shadow-[0_0_0_6px_rgba(255,90,54,0.16)]"
+          <Link
+              to="/register"
+              className="group relative inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-thread to-thread-2 px-5 py-2.5 text-[0.875rem] font-medium text-white shadow-[0_0_0_0_rgba(255,90,54,0.35)] transition-all duration-300 hover:scale-[1.04] hover:shadow-[0_0_0_6px_rgba(255,90,54,0.16)]"
           >
-            Sign Up Free
+                Sign Up Free
             <ArrowRight
-              size={15}
-              className="transition-transform duration-300 group-hover:translate-x-0.5"
+                size={15}
+                className="transition-transform duration-300 group-hover:translate-x-0.5"
             />
-          </a>
+          </Link>
         </div>
 
         {/* Mobile toggle */}
@@ -179,14 +183,17 @@ export default function Navbar() {
             >
               Log In
             </a>
-            <a
-              href="#signup"
-              onClick={(e) => handleNavClick(e, "#signup")}
-              className="inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-thread to-thread-2 px-5 py-2.5 text-[0.875rem] font-medium text-white"
+            
+
+            <Link
+                to="/register"
+                onClick={() => setOpen(false)}
+                className="inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-thread to-thread-2 px-5 py-2.5 text-[0.875rem] font-medium text-white"
+
             >
-              Sign Up Free
+                Sign Up Free
               <ArrowRight size={15} />
-            </a>
+            </Link>
           </li>
 
           {/* ---- Theme toggle (mobile) ---- */}
