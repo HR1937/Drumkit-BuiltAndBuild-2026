@@ -2,7 +2,7 @@
 
 ## 🌐 Landing Page
 
-**Live Landing Page:** [Cross-Channel Journey Stitching Platform](https://drumkit-built-and-build-2026.vercel.app/?utm_source=chatgpt.com)
+**Live Landing Page:** [Cross-Channel Journey Stitching Platform](https://drumkit-built-and-build-2026.vercel.app/)
 
 ---
 
