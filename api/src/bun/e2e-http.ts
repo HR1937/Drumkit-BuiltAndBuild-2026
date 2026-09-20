@@ -1,0 +1,13 @@
+import 'dotenv/config'; import pg from 'pg';
+const base = process.env.E2E_BASE_URL ?? 'http://localhost:8790'; const email = `e2e-${Date.now()}@example.test`; let cookie = '';
+async function request(path: string, init: RequestInit = {}) { const response = await fetch(base + path, { ...init, headers: { 'content-type': 'application/json', cookie, ...(init.headers ?? {}) } }); const set = response.headers.get('set-cookie'); if (set) cookie = set.split(';')[0]; const body = response.status === 204 ? null : await response.json().catch(() => null); if (!response.ok) throw new Error(`${path}:${response.status}:${JSON.stringify(body)}`); return { response, body }; }
+const registration = await request('/api/auth/register', { method: 'POST', body: JSON.stringify({ companyName: 'E2E Tenant', displayName: 'E2E Admin', email, password: 'secure-password-123' }) }); const companyId = registration.body.company.companyId;
+try {
+  const me = await request('/api/me'); const source = await request('/api/sources', { method: 'POST', body: JSON.stringify({ name: 'E2E Source', connectionMethod: 'REST_API', sourceType: 'EVENT_API' }) });
+  const report = await request('/api/reports', { method: 'POST', body: JSON.stringify({ name: 'E2E Report', reportType: 'IDENTITY_DATA_QUALITY', configuration: {} }) });
+  const run = await request(`/api/reports/${report.body.report.reportId}/execute`, { method: 'POST', body: '{}' }); const runId = run.body.run.runId;
+  const artifact = await request(`/api/reports/runs/${runId}/artifacts`, { method: 'POST', body: JSON.stringify({ format: 'json' }) }); const download = await fetch(`${base}/api/reports/runs/${runId}/artifact`, { headers: { cookie } }); const bytes = await download.arrayBuffer();
+  const history = await request('/api/reports/runs'); await request(`/api/reports/${report.body.report.reportId}`, { method: 'DELETE' }); const retained = await request('/api/reports/runs');
+  const hasRun = (rows: any[]) => rows.some((row: any) => (row.run?.runId ?? row.runId) === runId);
+  console.log(JSON.stringify({ passed: Boolean(me.body.account.companyId === companyId && source.body.source.sourceId && run.body.status === 'COMPLETED' && artifact.body.artifact.filename && download.ok && bytes.byteLength > 0 && hasRun(history.body.runs) && hasRun(retained.body.runs)), registration: true, session: true, onboardingSource: true, reportExecution: run.body.status, artifactDownloadBytes: bytes.byteLength, retainedAfterDelete: hasRun(retained.body.runs) }));
+} finally { const pool = new pg.Pool({ connectionString: process.env.DATABASE_URL }); await pool.query('delete from company where company_id=$1', [companyId]); await pool.end(); }

@@ -1,0 +1,8 @@
+import fs from "node:fs/promises";
+import path from "node:path";
+
+export function safeSlug(value) { return String(value || "company").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 60) || "company"; }
+export function artifactFilename(company, reportType, runId, format, createdAt = new Date()) { const stamp = createdAt.toISOString().replace(/[-:]/g, "").replace(/\.\d{3}Z$/, "Z"); return `breeze-${safeSlug(company)}-${reportType}-${runId}-${stamp}.${format}`; }
+function csvValue(value) { if (value === null || value === undefined) return ""; if (typeof value === "object") return JSON.stringify(value).replaceAll('"', '""'); return String(value).replaceAll('"', '""'); }
+export function toCsv(snapshot) { const rows = snapshot.rows || [snapshot.metrics || snapshot]; const keys = [...new Set(rows.flatMap((row) => Object.keys(row || {})))].sort(); return [keys.join(","), ...rows.map((row) => keys.map((key) => `"${csvValue(row[key])}"`).join(","))].join("\n") + "\n"; }
+export async function writeArtifact({ directory, company, reportType, runId, format, snapshot }) { if (!["json", "csv"].includes(format)) throw Object.assign(new Error("FORMAT_NOT_AVAILABLE"), { code: "UNAVAILABLE" }); await fs.mkdir(directory, { recursive: true }); const filename = artifactFilename(company, reportType, runId, format); const filePath = path.join(directory, filename); const body = format === "json" ? JSON.stringify(snapshot, null, 2) : toCsv(snapshot); await fs.writeFile(filePath, body, "utf8"); return { format, filename, path: filePath, created_at: new Date().toISOString(), expires_at: new Date(Date.now() + 31 * 24 * 60 * 60 * 1000).toISOString() }; }

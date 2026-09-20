@@ -1,0 +1,36 @@
+{
+  "name": "breeze-api",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "node --watch src/server.js",
+    "start": "node src/server.js",
+    "migrate": "node src/migrate.js",
+    "test": "node --test test/*.test.js",
+    "bun:dev": "bun --watch src/bun/server.ts",
+    "bun:start": "bun src/bun/server.ts",
+    "typecheck": "tsc --noEmit",
+    "seed": "bun src/bun/seed.ts",
+    "verify:db": "bun src/bun/verify-db.ts"
+  },
+  "dependencies": {
+    "argon2": "^0.44.0",
+    "cookie": "^1.0.2",
+    "docx": "^9.7.1",
+    "dotenv": "^17.2.2",
+    "drizzle-orm": "^0.45.2",
+    "express": "^5.1.0",
+    "hono": "^4.13.8",
+    "pdfkit": "^0.20.2",
+    "pg": "^8.16.3",
+    "postgres": "^3.4.9",
+    "uuid": "^11.1.0"
+  },
+  "devDependencies": {
+    "@types/bun": "^1.4.2",
+    "@types/node": "^26.6.2",
+    "@types/pdfkit": "^0.17.6",
+    "@types/pg": "^8.23.1",
+    "typescript": "^7.0.2"
+  }
+}

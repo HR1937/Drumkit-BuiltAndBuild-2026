@@ -1,0 +1,16 @@
+import { resolvePeriod } from "./period.js";
+import { safeRate, STATUSES } from "./analytics.js";
+
+export const REPORT_TYPES = Object.freeze(["CUSTOMER_JOURNEY_OVERVIEW", "DROPOFF_ANALYSIS", "ESCALATION_ANALYSIS", "REPEAT_CONTACT_ANALYSIS", "UNRESOLVED_ISSUES", "CHURN_ASSOCIATED_EXPERIENCE", "IDENTITY_DATA_QUALITY"]);
+export function validateReportParameters(parameters = {}, timezone = "UTC") { if (!parameters.report_type || !REPORT_TYPES.includes(parameters.report_type)) throw Object.assign(new Error("Unsupported report type."), { code: "INVALID_INPUT" }); const period = resolvePeriod({ ...parameters.date_range, timezone }); return { ...parameters, period: { start: period.start.toISOString(), end: period.end.toISOString(), timezone: period.timezone } }; }
+export async function executeReport({ reportType, companyId, parameters, query }) {
+  const period = parameters.period; const args = [companyId, period.start, period.end]; let sql; let tables;
+  if (reportType === "CUSTOMER_JOURNEY_OVERVIEW" || reportType === "DROPOFF_ANALYSIS") { sql = "SELECT status,count(*)::int AS count FROM journey_instance WHERE company_id=$1 AND started_at >= $2 AND started_at < $3 GROUP BY status ORDER BY status"; tables = ["journey_instance"]; }
+  else if (reportType === "ESCALATION_ANALYSIS") { sql = "SELECT detection_method,count(*)::int AS count FROM escalation WHERE company_id=$1 AND occurred_at >= $2 AND occurred_at < $3 GROUP BY detection_method ORDER BY detection_method"; tables = ["escalation"]; }
+  else if (reportType === "UNRESOLVED_ISSUES") { sql = "SELECT status,count(*)::int AS count FROM issue WHERE company_id=$1 AND created_at >= $2 AND created_at < $3 AND status IN ('OPEN','IN_PROGRESS','ESCALATED','REOPENED') GROUP BY status ORDER BY status"; tables = ["issue"]; }
+  else if (reportType === "IDENTITY_DATA_QUALITY") { sql = "SELECT status,count(*)::int AS count FROM identity_resolution WHERE company_id=$1 AND decided_at >= $2 AND decided_at < $3 GROUP BY status ORDER BY status"; tables = ["identity_resolution"]; }
+  else if (reportType === "REPEAT_CONTACT_ANALYSIS") { sql = "SELECT c_id,count(*)::int AS contacts FROM event WHERE company_id=$1 AND event_time >= $2 AND event_time < $3 AND c_id IS NOT NULL GROUP BY c_id ORDER BY c_id"; tables = ["event"]; }
+  else { sql = "SELECT count(*)::int AS churned FROM churn_outcome WHERE company_id=$1 AND churn_timestamp >= $2 AND churn_timestamp < $3"; tables = ["churn_outcome"]; }
+  const result = await query(sql, args); const rows = result.rows; const status = rows.length ? STATUSES.AVAILABLE : STATUSES.EMPTY; const counts = rows.reduce((total, row) => total + Number(row.count || row.contacts || row.churned || 0), 0);
+  return { schema_version: "1", report_type: reportType, parameters, period, status, metrics: { eligible: counts, row_count: rows.length }, rows, sample_sizes: { eligible: counts }, denominators: { eligible: counts }, generated_at: new Date().toISOString(), data_as_of: new Date().toISOString(), processing_lag_ms: 0, formula_version: "prompt-5-v1", config_version: "prompt-8-v1", provenance: { company_id: companyId, tables }, limitations: status === STATUSES.EMPTY ? ["No eligible records in the selected period."] : [] };
+}
