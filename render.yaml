@@ -1,0 +1,63 @@
+services:
+  # ── 1. Backend API ──────────────────────────────────────────────
+  - type: web
+    name: nextjour-api
+    runtime: node
+    rootDir: api
+    plan: free
+    buildCommand: npm install
+    startCommand: node src/server.js
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        sync: false          # set manually in Render dashboard
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_ANON_KEY
+        sync: false
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        sync: false
+      - key: GEMINI_API_KEY
+        sync: false
+      # CORS on the API must allow these two frontend origins once deployed
+      - key: ALLOWED_ORIGINS
+        value: https://nextjour-landing.onrender.com,https://nextjour-dashboard.onrender.com
+
+  # ── 2. Landing / Workspace app (React + Vite) ───────────────────
+  - type: web
+    name: nextjour-landing
+    runtime: static
+    rootDir: landing
+    buildCommand: npm install && npm run build
+    staticPublishPath: dist
+    envVars:
+      # injected at build time so the frontend calls the live API,
+      # not localhost
+      - key: VITE_API_URL
+        fromService:
+          type: web
+          name: nextjour-api
+          property: hostport
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
+
+  # ── 3. Dashboard / reports prototype (React + Vite) ─────────────
+  - type: web
+    name: nextjour-dashboard
+    runtime: static
+    rootDir: dashboard
+    buildCommand: npm install && npm run build
+    staticPublishPath: dist
+    envVars:
+      - key: VITE_API_URL
+        fromService:
+          type: web
+          name: nextjour-api
+          property: hostport
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
